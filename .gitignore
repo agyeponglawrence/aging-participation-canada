@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store
+# full StatCan table (all provinces) is large; fetch with analysis/download_data.py
+data/raw/14100017.csv
+data/raw/*.zip
