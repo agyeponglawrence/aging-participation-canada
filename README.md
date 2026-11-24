@@ -66,7 +66,7 @@ print(res[["aging", "participation"]].sum())
 
 ```
 README.md                   this file
-METHOD.md                   one-page method card: formula, choices, checks, when not to use it
+METHOD.md                   full method and data notes: formula, data, checks, caveats, when not to use it
 DECISIONS.md                the judgment calls behind the analysis, and alternatives rejected
 shiftshare/                 the reusable decomposition (no Canada-specific code)
 analysis/
