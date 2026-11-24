@@ -1,10 +1,10 @@
-"""Builds output/canada/Aging_LFP_shift_share_Canada.xlsx: the full decomposition with live Excel formulas.
+"""Builds excel/Aging_LFP_shift_share_Canada.xlsx: the full decomposition with live Excel formulas.
 Run: python analysis/build_workbook.py  (then recalculate in Excel or LibreOffice to fill cached values)."""
 from pathlib import Path
 import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data" / "raw" / "statcan_14-10-0017-01_canada.csv"
-OUT = ROOT / "output" / "canada"
+OUT = ROOT / "excel"
 OUT.mkdir(parents=True, exist_ok=True)
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side

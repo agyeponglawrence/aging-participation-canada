@@ -41,5 +41,13 @@ def main():
     print(f"Saved {DEST / '14100017.csv'}")
 
 
+MANUAL = ("Download failed. Get the table by hand instead:\n"
+          "  1. Open https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410001701\n"
+          "  2. Choose Download options -> Download entire table\n"
+          "  3. Unzip it and put 14100017.csv in data/raw/")
+
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:  # network errors, site maintenance, unexpected response
+        sys.exit(f"{type(e).__name__}: {e}\n\n{MANUAL}")

@@ -1,98 +1,110 @@
 # How much of the fall in participation is aging?
 
-A replication package for **"Nothing pushing back: the full weight of aging returns to Canada's labour market"** by Lawrence Agyepong (November 2026).
+This is the replication package for my article **"Nothing pushing back: the full weight of aging returns to Canada's labour market"** (November 2026).
 
-The analysis splits the change in the labour force participation rate into two parts:
+The analysis splits the change in Canada's labour force participation rate since 2011 into two parts:
 
-- an **aging effect**: the population shifting into older age groups, where fewer people work
-- a **participation effect**: participation rising or falling within each age group
+- **Aging effect:** more of the population is in older age groups, where fewer people work.
+- **Participation effect:** people within each age group are working, or looking for work, more or less than before.
 
-It works for Canada or any province, from any base year.
+**Main result:** aging took 4.1 percentage points off the participation rate between 2011 and 2026. Rising participation, mostly among older women, gave back 2.2 points. Since 2024 that offset has stopped.
 
-## Headline results (Canada, 2011 to January–October 2026)
+---
 
-| Measure | Percentage points |
+## Start here
+
+Pick the route that suits you. You don't need all three.
+
+| I want to… | Go to |
 |---|---|
-| Actual change in the participation rate (66.8% → 64.9%) | −1.92 |
-| Aging effect | −4.11 |
-| Participation effect | +2.20 |
-| … of which women, all ages | +1.62 |
-| … of which women 55 and over | +1.07 |
-| … of which men 55 and over | +0.72 |
+| Understand the method | [METHOD.md](METHOD.md): the formula, data, checks and caveats on one page |
+| Check the numbers in Excel | [`excel/Aging_LFP_shift_share_Canada.xlsx`](excel/). Start with the **ReadMe** and **Summary** tabs. |
+| Rerun it, or run it for a province | The Python steps below |
 
-Since 2024 the participation effect has been at or below zero (−0.35 in 2024, −0.03 in 2025, −0.01 in 2026 so far), while the aging effect has come back to −0.36 in 2026. The full year-by-year numbers are in `output/canada/annual_contributions.csv`.
+---
 
-## Quick start
+## Run it in Python
+
+You need Python 3.10 or later.
+
+**1. Get the files.** On this page, click **Code → Download ZIP** and unzip it, or run:
+
+```bash
+git clone https://github.com/agyeponglawrence/aging-participation-canada
+cd aging-participation-canada
+```
+
+**2. Install the packages** (once):
 
 ```bash
 pip install -r requirements.txt
-python analysis/run.py                 # Canada, base year 2011, using the bundled data
 ```
 
-Tables and charts are written to `output/canada/`.
+**3. Run the analysis for Canada:**
+
+```bash
+python analysis/run.py
+```
+
+The results appear in `output/canada/`: three CSV tables and three charts. The first table, `summary.csv`, has the headline numbers.
 
 ### Run it for a province
 
-The bundled data covers Canada only. For a province, download the full table once, then pass the province name:
+The repository only includes data for Canada. For a province, download the full Statistics Canada table once (it's large, so it can take a few minutes), then name the province:
 
 ```bash
-python analysis/download_data.py       # saves data/raw/14100017.csv (large; git-ignored)
+python analysis/download_data.py
 python analysis/run.py --geo Saskatchewan --data data/raw/14100017.csv
-python analysis/run.py --geo "British Columbia" --start 2015 --data data/raw/14100017.csv
 ```
 
-Use the province name exactly as Statistics Canada spells it (for example `"Newfoundland and Labrador"`). The script stops with a clear message if a series is missing or suppressed, which can happen for the smallest provinces.
+Results go to `output/saskatchewan/`. Use the province name exactly as Statistics Canada spells it, in quotes if it has spaces: `"British Columbia"`, `"Newfoundland and Labrador"`, `"Prince Edward Island"`.
 
-### Use the method on your own data
+To start from a different year, add `--start`, for example `--start 2015`.
 
-The decomposition itself is in `shiftshare/`. It doesn't know anything about Canada, so you can use it for any population split into groups (age, sex, region, education):
+If the download fails (Statistics Canada's site is sometimes down for maintenance), get the table by hand from the [table page](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410001701): choose **Download options → Download entire table**, unzip it, and put `14100017.csv` in `data/raw/`.
+
+---
+
+## What's in the folder
+
+| Folder or file | What it is |
+|---|---|
+| `METHOD.md` | The method, data notes, checks and caveats |
+| `DECISIONS.md` | Why I made each choice (base year, weights, age groups) and what I considered instead |
+| `excel/` | `Aging_LFP_shift_share_Canada.xlsx`: the full analysis with live formulas, so every number traces back to a Statistics Canada row. `original_working_file.xlsx`: the working file I first built the analysis in (pivot tables, age groups only). |
+| `analysis/` | The Python scripts. `run.py` is the only one most people need. |
+| `shiftshare/` | The decomposition itself, written so it works on any data (see below) |
+| `data/raw/` | The Statistics Canada data for Canada |
+| `output/canada/` | Results for Canada: tables and charts |
+
+The charts here are deliberately plain. The ones in the article are styled differently but show the same numbers.
+
+---
+
+## Use the method on other data
+
+The decomposition in `shiftshare/` doesn't know anything about Canada. Give it population and labour force by group for two periods and it returns the two effects. Run this from the repository folder:
 
 ```python
 import pandas as pd
 from shiftshare import shift_share
 
-pop0 = pd.Series({"15-24": 4.5, "25-54": 14.8, "55+": 11.9})   # population, period 0
-lf0  = pd.Series({"15-24": 2.9, "25-54": 12.8, "55+": 4.4})    # labour force, period 0
+# made-up numbers: population and labour force by group, in two periods
+pop0 = pd.Series({"15-24": 4.5, "25-54": 14.8, "55+": 11.9})
+lf0  = pd.Series({"15-24": 2.9, "25-54": 12.8, "55+": 4.4})
 pop1 = pd.Series({"15-24": 4.6, "25-54": 15.6, "55+": 13.6})
 lf1  = pd.Series({"15-24": 2.8, "25-54": 13.6, "55+": 5.0})
 
-res = shift_share(pop0, lf0, pop1, lf1)   # columns: aging, participation, total (pp)
-print(res[["aging", "participation"]].sum())
+result = shift_share(pop0, lf0, pop1, lf1)
+print(result[["aging", "participation"]].sum())   # percentage points
 ```
 
-`chained()` runs the same thing over a sequence of periods. These numbers are made up for illustration.
+---
 
-## What's in the repo
+## Data, licence and citation
 
-```
-README.md                   this file
-METHOD.md                   full method and data notes: formula, data, checks, caveats, when not to use it
-DECISIONS.md                the judgment calls behind the analysis, and alternatives rejected
-shiftshare/                 the reusable decomposition (no Canada-specific code)
-analysis/
-    run.py                  command-line entry point: tables + charts for any geography
-    lfp.py                  loads Table 14-10-0017-01 and chains the decomposition
-    download_data.py        fetches the full table (all provinces) from Statistics Canada
-    build_workbook.py       rebuilds the Canada Excel workbook with live formulas
-data/raw/                   Canada extract of Table 14-10-0017-01 (see data/README.md)
-output/canada/              results for Canada: CSV tables, charts, Excel workbook
-```
+- **Data:** Statistics Canada, [Table 14-10-0017-01](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410001701), monthly, not seasonally adjusted. Used under the [Statistics Canada Open Licence](https://www.statcan.gc.ca/en/reference/licence).
+- **Code:** MIT licence (see `LICENSE`). You're free to reuse and adapt it with credit.
+- **Cite as:** Agyepong, L. (2026). *Nothing pushing back: the full weight of aging returns to Canada's labour market*. Replication package. https://github.com/agyeponglawrence/aging-participation-canada
 
-The **Excel workbook** (`output/canada/Aging_LFP_shift_share_Canada.xlsx`) does the same decomposition with live formulas, so you can trace every number back to a Statistics Canada row without writing code. It covers Canada only. The Python version produces the same results.
-
-The charts in this repo are deliberately plain. The published versions in the article are styled differently, but they show the same numbers.
-
-## Requirements
-
-Python 3.10 or later, with pandas, numpy, matplotlib and openpyxl (see `requirements.txt`).
-
-## Data and licence
-
-- Data: Statistics Canada, [Table 14-10-0017-01](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410001701), Labour force characteristics by gender and detailed age group, monthly, unadjusted for seasonality. Reproduced and distributed on an "as is" basis with the permission of Statistics Canada, under the [Statistics Canada Open Licence](https://www.statcan.gc.ca/en/reference/licence).
-- Code: MIT licence (see `LICENSE`).
-
-## Citation
-
-Agyepong, L. (2026). *Nothing pushing back: the full weight of aging returns to Canada's labour market*. Replication package, https://github.com/agyeponglawrence/aging-participation-canada
-
-Questions or errors: open an issue.
+Found an error or have a question? [Open an issue](https://github.com/agyeponglawrence/aging-participation-canada/issues).
