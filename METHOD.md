@@ -1,6 +1,6 @@
 # Method and data
 
-The full method behind **"Nothing pushing back: the full weight of aging returns to Canada's labour market"** (Lawrence Agyepong, November 2026). The article keeps only a short note; the details, checks and caveats are here.
+The full method behind **"Canada's aging drag is back, and nothing is offsetting it"** (Lawrence Agyepong, November 2026). The article keeps only a short note; the details, checks and caveats are here.
 
 ## The question
 

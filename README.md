@@ -1,6 +1,6 @@
 # How much of the fall in participation is aging?
 
-This is the replication package for my article **"Nothing pushing back: the full weight of aging returns to Canada's labour market"** (November 2026).
+This is the replication package for my article **"Canada's aging drag is back, and nothing is offsetting it"** (November 2026).
 
 The analysis splits the change in Canada's labour force participation rate since 2011 into two parts:
 
@@ -105,6 +105,6 @@ print(result[["aging", "participation"]].sum())   # percentage points
 
 - **Data:** Statistics Canada, [Table 14-10-0017-01](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410001701), monthly, not seasonally adjusted. Used under the [Statistics Canada Open Licence](https://www.statcan.gc.ca/en/reference/licence).
 - **Code:** MIT licence (see `LICENSE`). You're free to reuse and adapt it with credit.
-- **Cite as:** Agyepong, L. (2026). *Nothing pushing back: the full weight of aging returns to Canada's labour market*. Replication package. https://github.com/agyeponglawrence/aging-participation-canada
+- **Cite as:** Agyepong, L. (2026). *Canada's aging drag is back, and nothing is offsetting it*. Replication package. https://github.com/agyeponglawrence/aging-participation-canada
 
 Found an error or have a question? [Open an issue](https://github.com/agyeponglawrence/aging-participation-canada/issues).
