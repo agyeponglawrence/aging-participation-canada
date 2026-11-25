@@ -50,7 +50,7 @@ The results appear in `output/canada/`: three CSV tables and three charts. The f
 
 ### Run it for a province
 
-The repository only includes data for Canada. For a province, download the full Statistics Canada table once (it's large, so it can take a few minutes), then name the province:
+The repository only includes data for Canada. For a province, download the full Statistics Canada table once (about 55 MB, 750 MB unzipped), then name the province:
 
 ```bash
 python analysis/download_data.py

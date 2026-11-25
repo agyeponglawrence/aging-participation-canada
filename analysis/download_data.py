@@ -5,7 +5,7 @@ download the full table first:
 
     python analysis/download_data.py
 
-This saves data/raw/14100017.csv (several hundred MB unzipped; it is git-ignored).
+This saves data/raw/14100017.csv (about 55 MB to download, 750 MB unzipped; it is git-ignored).
 Then run, for example:
 
     python analysis/run.py --geo Saskatchewan --data data/raw/14100017.csv
@@ -23,18 +23,30 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DEST = ROOT / "data" / "raw"
+# StatCan refuses requests with no client name, so the script names itself
+HEADERS = {"User-Agent": "aging-participation-canada/1.0 (+https://github.com/agyeponglawrence/aging-participation-canada)"}
 WDS = "https://www150.statcan.gc.ca/t1/wds/rest/getFullTableDownloadCSV/14100017/en"
 
 
+DIRECT = "https://www150.statcan.gc.ca/n1/tbl/csv/14100017-eng.zip"
+
+
+def zip_url():
+    """Ask StatCan's web data service for the current link; fall back to the fixed one."""
+    try:
+        with urllib.request.urlopen(urllib.request.Request(WDS, headers=HEADERS), timeout=60) as r:
+            info = json.load(r)
+        if info.get("status") == "SUCCESS":
+            return info["object"]
+    except Exception:
+        pass
+    return DIRECT
+
+
 def main():
-    print("Asking StatCan for the download link...")
-    with urllib.request.urlopen(WDS, timeout=60) as r:
-        info = json.load(r)
-    if info.get("status") != "SUCCESS":
-        sys.exit(f"StatCan returned: {info}")
-    url = info["object"]
-    print(f"Downloading {url} ...")
-    with urllib.request.urlopen(url, timeout=600) as r:
+    url = zip_url()
+    print(f"Downloading {url} (about 55 MB) ...")
+    with urllib.request.urlopen(urllib.request.Request(url, headers=HEADERS), timeout=600) as r:
         data = r.read()
     with zipfile.ZipFile(io.BytesIO(data)) as z:
         z.extract("14100017.csv", DEST)

@@ -41,12 +41,11 @@ def load(path, geo: str = "Canada") -> pd.DataFrame:
     p = d.pivot_table(index='REF_DATE', columns=['Labour force characteristics', 'Gender', 'Age group'],
                       values='VALUE')
     need = [(m, g, b) for m in ['Population', 'Labour force'] for g in [TOTAL, *SEXES] for b in BANDS]
-    missing = [c for c in need if c not in p.columns or p[c].isna().any()]
-    if missing:
-        raise SystemExit(f"{len(missing)} series are missing or suppressed for {geo}, e.g. {missing[:3]}.\n"
-                         "Small provinces can have suppressed cells; try a larger geography.")
+    absent = [c for c in need if c not in p.columns]
+    if absent:
+        raise SystemExit(f"{len(absent)} series are missing for {geo}, e.g. {absent[:3]}.")
     p.index = pd.PeriodIndex(p.index, freq='M')
-    return p
+    return p[need + [c for c in p.columns if c not in need]]
 
 
 @dataclass
@@ -77,6 +76,13 @@ def decompose(monthly: pd.DataFrame, geo: str = "", start: int = 2011) -> Result
     compares the same months with the year before (the detailed data are not seasonally
     adjusted), chained onto the last full year's annual average.
     """
+    # suppressed cells only matter inside the period analysed (the table starts in 1976)
+    used = monthly[monthly.index.year >= start]
+    gaps = used.columns[used.isna().any()].tolist()
+    if gaps:
+        months = used.index[used.isna().any(axis=1)]
+        raise SystemExit(f"{len(gaps)} series have suppressed values for {geo} between {months.min()} and "
+                         f"{months.max()}, e.g. {gaps[:3]}.\nTry a later --start year or a larger geography.")
     years = monthly.index.year
     last_year = int(years.max())
     last_month = int(monthly.index[years == last_year].month.max())
